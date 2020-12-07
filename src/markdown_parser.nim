@@ -17,10 +17,11 @@ type
 
 proc tokenize(s: string): seq[Token] =
   const tokenKinds: seq[TokenKind] = @[
-    TokenKind(kind: "header", regex: "#+"),
+    TokenKind(kind: "header", regex: "[\\n]?#+"),
     TokenKind(kind: "text", regex: "[A-Za-z0-9 ]+"),
     TokenKind(kind: "asterisk", regex: "\\*"),
     TokenKind(kind: "underscore", regex: "_"),
+    TokenKind(kind: "lineEnding", regex: "\\n"),
   ]
   var text = s
   var res: seq[Token]
@@ -40,8 +41,25 @@ proc tokenize(s: string): seq[Token] =
 
   return res
 
+proc generate(tokens: seq[Token]): string =
+  # iterate through the tokens
+  # check what a token is and decide what to do with it
+  # we can 'consume' a token or 'peek' at the next token
+  return "<h1>foo</h1>"
+
 when isMainModule:
   import unittest
+
+  suite "generation":
+    test "generating header html":
+      let tokens = @[
+        Token(kind: "header", value: "#"),
+        Token(kind: "text", value: " foo")
+        ]
+
+      let generate = generate(tokens)
+
+      check generate == "<h1>foo</h1>"
 
   suite "tokenization":
     test "tokenizing a header":
@@ -70,3 +88,10 @@ when isMainModule:
       check underscore[1] == Token(kind: "underscore", value: "_")
       check underscore[2] == Token(kind: "text", value: "word")
       check underscore[3] == Token(kind: "underscore", value: "_")
+
+    test "tokenizing line endings":
+      let ending = tokenize("some words\nsome more words")
+
+      check ending[0] == Token(kind: "text", value: "some words")
+      check ending[1] == Token(kind: "lineEnding", value: "\n")
+      check ending[2] == Token(kind: "text", value: "some more words")
