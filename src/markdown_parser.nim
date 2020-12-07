@@ -2,17 +2,12 @@
 # uses this file as the main entry point of the application.
 
 import nre, strformat, strutils
-imprt unittest
 
 type
   Token = object
     kind: string
     value: string
 proc `==`(a, b: Token): bool =
-  echo a.kind
-  echo b.kind
-  echo a.value
-  echo b.value
   return (a.kind == b.kind) and (a.value == b.value)
 
 type
@@ -44,8 +39,17 @@ proc tokenize(s: string): seq[Token] =
   return res
 
 when isMainModule:
-  echo "\n\n"
-  let tokens = tokenize("# h1")
+  import unittest
 
-  try:
-    doAssert(tokens[0] == Token(kind: "header", value: "#"))
+  suite "tokenization":
+    test "tokenizing a header works":
+      let header = tokenize("# h1")
+
+      check header[0] == Token(kind: "header", value: "#")
+      check header[1] == Token(kind: "text", value: "h1")
+
+    test "tokenizing a long header works":
+      let header = tokenize("### some text")
+
+      check header[0] == Token(kind: "header", value: "###")
+      check header[1] == Token(kind: "text", value: "some text")
