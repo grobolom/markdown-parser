@@ -41,11 +41,10 @@ proc tokenize(s: string): seq[Token] =
 
   return res
 
-proc generate(tokens: seq[Token]): string =
-  # iterate through the tokens
-  # check what a token is and decide what to do with it
-  # we can 'consume' a token or 'peek' at the next token
-  return "<h1>foo</h1>"
+# proc generate(tokens: seq[Token]): string =
+#   for token in tokens:
+#     result &= renderToken(token)
+#   return "<h1>foo</h1>"
 
 when isMainModule:
   import unittest
@@ -57,9 +56,20 @@ when isMainModule:
         Token(kind: "text", value: " foo")
         ]
 
-      let generate = generate(tokens)
+      let html = generate(tokens)
 
-      check generate == "<h1>foo</h1>"
+      check html == "<h1>foo</h1>"
+
+    test "generating bold text":
+      let tokens = @[
+        Token(kind: "asterisk", value: "*"),
+        Token(kind: "text", value: "foo"),
+        Token(kind: "asterisk", value: "*"),
+      ]
+
+      let html = generate(tokens)
+
+      check html == "<p><em>foo</em></p>"
 
   suite "tokenization":
     test "tokenizing a header":
