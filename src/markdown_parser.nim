@@ -24,27 +24,53 @@ type
   ParseError = object of ValueError
 
 const matchRules = [
-  MatchRule(token: TokenTypes.Header, regex: "\\A(#{0,6}) *(\\w+)")
+  MatchRule(token: TokenTypes.Header, regex: "(#{0,6}) *(\\w+)")
 ]
 
-proc findToken(text: string, matcher: MatchRule): Token =
-  const value = Header(text: "h1", level: 1);
-  return Token(kind: TokenTypes.Header, headerVal: value)
+proc findToken(text: string, start: var int, matcher: MatchRule): Token =
+  let regex = re(&"\\A{matcher.regex}")
+  let match = text.match(regex)
 
-proc parse*(text: var string): seq[Token] =
-  while len(text) > 0:
+  if match == none(RegexMatch):
+    return nil
+
+  var length: int = 0
+
+  case matcher.token
+  of TokenTypes.Header:
+    var val: Header
+    val.level = len(match.get.captures[0])
+    val.text = match.get.captures[1]
+    length = len(match.get.captures[-1])
+    result = Token(kind: TokenTypes.Header, headerVal: val)
+
+  start += length
+
+proc renderToken(token: Token): string =
+  case token.kind
+  of TokenTypes.Header:
+    let val = token.headerVal
+    result &= &"<h{val.level}>{val.text}</h{val.level}>"
+
+proc parse*(text: var string): string =
+  var tokens: seq[Token]
+  var start = 0;
+
+  while start < len(text):
     var token: Token
 
     for matcher in matchRules:
-      token = findToken(text, matcher)
+      token = findToken(text, start, matcher)
 
       if token != nil:
-        result &= token
+        tokens &= token
         break
 
       if token == nil:
-        raise newException(ParseError, "we got a bad token for {text}")
+        raise newException(ParseError, &"we got a bad token for {text}")
 
+  for tok in tokens:
+    result &= renderToken(tok)
 
 when isMainModule:
   import unittest
