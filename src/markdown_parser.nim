@@ -1,30 +1,8 @@
-# This is just an example to get you started. A typical binary package
-# uses this file as the main entry point of the application.
+import tokens
 
 import nre, strformat, strutils
 
-# so, we have learned some stuff. Let's start by testing a conversion of the
-# header token into a proper piece of html
 type
-  Header = object
-    text: string
-    level: int
-
-  Callout = object
-    text: string
-
-  Paragraph = object
-    text: string
-
-  TokenTypes {.pure.} = enum
-    Header, Callout, Paragraph
-
-  Token = ref object
-    case kind: TokenTypes
-    of TokenTypes.Header: headerVal: Header
-    of TokenTypes.Callout: calloutVal: Callout
-    of TokenTypes.Paragraph: paragraphVal: Paragraph
-
   MatchRule = object
     token: TokenTypes
     regex: string
@@ -48,7 +26,7 @@ proc findToken(text: string, start: var int, matcher: MatchRule): Token =
 
   case matcher.token
   of TokenTypes.Header:
-    var val: Header
+    var val: tokens.Header
     val.level = len(match.get.captures[0])
     val.text = match.get.captures[1]
     length = len(match.get.captures[-1])
@@ -100,3 +78,7 @@ proc parse*(text: var string): string =
   let tokens: seq[Token] = tokenize(text)
   for tok in tokens:
     result &= renderToken(tok)
+
+
+when isMainModule:
+  echo "cool"

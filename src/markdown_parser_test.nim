@@ -1,4 +1,4 @@
-import parse from "./markdown_parser"
+from markdown_parser import parse
 
 when isMainModule:
   import unittest
