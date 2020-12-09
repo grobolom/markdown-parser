@@ -22,19 +22,15 @@ proc findToken(text: string, start: var int, tokenType: TokenTypes, matcher: str
 
   case tokenType
   of TokenTypes.Header:
-    var val: Header
-    val.level = len(match.get.captures[0])
-    val.text = match.get.captures[1]
+    let val = Header(level: len(match.get.captures[0]), text: match.get.captures[1])
     length = len(match.get.captures[-1])
     result = Token(kind: TokenTypes.Header, headerVal: val)
   of TokenTypes.Callout:
-    var val: Callout
-    val.text = match.get.captures[0]
+    let val = Callout(text: match.get.captures[0])
     length = len(match.get.captures[-1])
     result = Token(kind: TokenTypes.Callout, calloutVal: val)
   of TokenTypes.Paragraph:
-    var val: Paragraph
-    val.text = match.get.captures[0]
+    let val = Paragraph(text: match.get.captures[0])
     length = len(val.text) + 1
     result = Token(kind: TokenTypes.Paragraph, paragraphVal: val)
 
