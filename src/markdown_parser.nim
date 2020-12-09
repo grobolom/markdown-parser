@@ -1,22 +1,18 @@
-import tokens
+from tokens import Token, TokenTypes, Header, Callout, Paragraph
 
 import nre, strformat, strutils
 
 type
-  MatchRule = object
-    token: TokenTypes
-    regex: string
-
   ParseError = object of ValueError
 
 const matchRules = [
-  MatchRule(token: TokenTypes.Header, regex: r"(#{1,6}) *(\w+)"),
-  MatchRule(token: TokenTypes.Callout, regex: r"```([\w\s]+)```"),
-  MatchRule(token: TokenTypes.Paragraph, regex: r"([\w ]+\n{0,1})+((\n\n){0,1})"),
+  TokenTypes.Header: r"(#{1,6}) *(\w+)",
+  TokenTypes.Callout: r"```([\w\s]+)```",
+  TokenTypes.Paragraph: r"([\w ]+\n{0,1})+((\n\n){0,1})",
 ]
 
-proc findToken(text: string, start: var int, matcher: MatchRule): Token =
-  let regex = re(&"\\A{matcher.regex}")
+proc findToken(text: string, start: var int, tokenType: TokenTypes, matcher: string): Token =
+  let regex = re(&"\\A{matcher}")
   let match = text[start..^1].match(regex)
 
   if match == none(RegexMatch):
@@ -24,9 +20,9 @@ proc findToken(text: string, start: var int, matcher: MatchRule): Token =
 
   var length: int = 0
 
-  case matcher.token
+  case tokenType
   of TokenTypes.Header:
-    var val: tokens.Header
+    var val: Header
     val.level = len(match.get.captures[0])
     val.text = match.get.captures[1]
     length = len(match.get.captures[-1])
@@ -62,8 +58,8 @@ proc tokenize(text: var string): seq[Token] =
   while start < len(text):
     var token: Token
 
-    for matcher in matchRules:
-      token = findToken(text, start, matcher)
+    for tokenType, matcher in matchRules:
+      token = findToken(text, start, tokenType, matcher)
 
       if token != nil:
         result &= token
