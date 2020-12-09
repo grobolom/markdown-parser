@@ -78,8 +78,7 @@ proc renderToken(token: Token): string =
     let val = token.paragraphVal
     result &= &"<p>{val.text.strip}</p>"
 
-proc parse*(text: var string): string =
-  var tokens: seq[Token]
+proc tokenize(text: var string): seq[Token] =
   var start = 0;
 
   while start < len(text):
@@ -89,7 +88,7 @@ proc parse*(text: var string): string =
       token = findToken(text, start, matcher)
 
       if token != nil:
-        tokens &= token
+        result &= token
         break
 
     # remember, this is de-dented because it should be
@@ -97,6 +96,8 @@ proc parse*(text: var string): string =
     if token == nil:
       raise newException(ParseError, &"we couldn't match from: {text}")
 
+proc parse*(text: var string): string =
+  let tokens: seq[Token] = tokenize(text)
   for tok in tokens:
     result &= renderToken(tok)
 
